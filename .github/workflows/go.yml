@@ -29,3 +29,21 @@ jobs:
 
     - name: Verify Go version
       run: go version
+
+  e2e-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21.7'
+        check-latest: false
+
+    - name: Make e2e test script executable
+      run: chmod +x scripts/e2e_test.sh
+  
+    - name: Run E2E Test
+      run: ./scripts/e2e_test.sh
