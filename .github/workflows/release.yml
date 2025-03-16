@@ -1,0 +1,68 @@
+---
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.7'
+          check-latest: false
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Run e2e tests
+        run: |
+          chmod +x scripts/e2e_test.sh
+          ./scripts/e2e_test.sh
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"* %s" --no-merges)
+          else
+            CHANGELOG=$(git log --pretty=format:"* %s" --no-merges ${PREVIOUS_TAG}..HEAD)
+          fi
+          
+          echo "$CHANGELOG" > changelog.txt
+          
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            LICENSE
+            README.md
+            go.mod
+            go.sum
+
+      - name: Notify about release
+        run: |
+          echo "🎉 Released version ${GITHUB_REF#refs/tags/}"
+          echo "Changelog:"
+          cat changelog.txt
