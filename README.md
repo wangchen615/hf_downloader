@@ -14,7 +14,7 @@ A lightweight and efficient Go package for downloading models from Hugging Face'
 ## Installation
 
 ```bash
-go get github.com/wangchen615/hf_download
+go get github.com/wangchen615/hf_downloader
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ package main
 
 import (
     "fmt"
-    "github.com/wangchen615/hf_download/hfdownloader"
+    "github.com/wangchen615/hf_downloader/hfdownloader"
 )
 
 func main() {

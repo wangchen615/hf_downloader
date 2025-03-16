@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wangchen615/hf_download/hfdownloader"
+	"github.com/wangchen615/hf_downloader/hfdownloader"
 )
 
 func main() {
